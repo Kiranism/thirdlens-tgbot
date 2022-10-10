@@ -22,19 +22,25 @@ bot.on("text", (ctx) => {
   };
   console.log(ctx.message);
   const callback = async function (data) {
-    const image = await data.images_results.map((item, index) => item.original);
+    try {
+      const image = await data.images_results.map(
+        (item, index) => item.original
+      );
 
-    console.log(image[0]);
-    // ctx.sendChatAction("upload_photo");
+      console.log(image[0]);
+      // ctx.sendChatAction("upload_photo");
 
-    ctx.sendChatAction("upload_document");
-    // ctx.replyWithPhoto(image[0]);
-    var myStringArray = image;
-    var arrayLength = myStringArray.length;
-    for (var i = 0; i < arrayLength; i++) {
-      console.log(myStringArray[i]);
-      ctx.replyWithPhoto(myStringArray[i]);
-      //Do something
+      ctx.sendChatAction("upload_document");
+      // ctx.replyWithPhoto(image[0]);
+      var myStringArray = image;
+      var arrayLength = myStringArray.length;
+      for (var i = 0; i < arrayLength; i++) {
+        console.log(myStringArray[i]);
+        ctx.replyWithPhoto(myStringArray[i]);
+        //Do something
+      }
+    } catch (error) {
+      console.log("errorblock", error);
     }
   };
 
