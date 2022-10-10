@@ -21,8 +21,8 @@ bot.on("text", (ctx) => {
     tbm: "isch",
   };
   console.log(ctx.message);
-  const callback = function (data) {
-    const image = data.images_results.map((item, index) => item.original);
+  const callback = async function (data) {
+    const image = await data.images_results.map((item, index) => item.original);
 
     console.log(image[0]);
     // ctx.sendChatAction("upload_photo");
