@@ -1,7 +1,7 @@
 const { Telegraf } = require("telegraf");
 require("dotenv").config();
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
-
+const util = require("util");
 const SerpApi = require("google-search-results-nodejs");
 const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY);
 
@@ -9,47 +9,89 @@ bot.start((ctx) => ctx.reply("Welcome to Third Eye Image Finder"));
 bot.help((ctx) =>
   ctx.reply("Type Name and The Bot will flood ur chat with relevant images")
 );
-// bot.on("sticker", (ctx) => ctx.reply("👍"));
-// bot.hears("hi", (ctx) => ctx.reply("Hey there"));
-bot.on("text", (ctx) => {
-  const params = {
-    device: "desktop",
-    engine: "google",
-    ijn: "0",
-    q: ctx.message.text,
-    google_domain: "google.com",
-    tbm: "isch",
-  };
-  console.log(ctx.message);
-  const callback = async function (data) {
-    try {
+bot.on("message", async (ctx) => {
+  let query = ctx.message.text;
+  if (typeof query === "string" && query.trim().length > 0) {
+    const params = {
+      device: "desktop",
+      engine: "google",
+      ijn: "0",
+      q: query,
+      google_domain: "google.com",
+      tbm: "isch",
+    };
+
+    // create a callback
+    callback = async (data) => {
+      console.log(data);
       const image = await data.images_results.map(
         (item, index) => item.original
       );
-
-      console.log(image[0]);
-      // ctx.sendChatAction("upload_photo");
-
       ctx.sendChatAction("upload_document");
-      // ctx.replyWithPhoto(image[0]);
       var myStringArray = image;
       var arrayLength = myStringArray.length;
       for (var i = 0; i < arrayLength; i++) {
         console.log(myStringArray[i]);
-        ctx.replyWithPhoto(myStringArray[i]);
-        //Do something
+        try {
+          await ctx.replyWithPhoto(myStringArray[i]);
+        } catch (error) {
+          console.log("error", error);
+          ctx.reply("error sending image");
+        }
       }
-    } catch (error) {
-      console.log("errorblock", error);
-    }
-  };
+    };
 
-  // Show result as JSON
-  search.json(params, callback);
-  // send a message to the chat acknowledging receipt of their message
+    // Show result as JSON
+    search.json(params, callback);
+  } else {
+    console.log("query is empty");
+  }
 });
-bot.launch();
 
-// Enable graceful stop
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+// inline query
+
+bot.on("inline_query", async (ctx) => {
+  try {
+    let query = ctx.inlineQuery.query;
+
+    if (typeof query === "string" && query.trim().length === 0) {
+      console.log("query is empty");
+    } else {
+      const params = {
+        device: "desktop",
+        engine: "google",
+        ijn: "0",
+        q: query ? query : "",
+        google_domain: "google.com",
+        tbm: "isch",
+      };
+
+      callback = async (data) => {
+        console.log(data);
+        const image = await data.images_results
+          .slice(0, 49)
+          .map((item, index) => {
+            return {
+              type: "photo",
+              id: String(index),
+              photo_url: item.original,
+              thumb_url: item.original,
+              photo_width: 300,
+              photo_height: 200,
+            };
+          });
+        try {
+          await ctx.answerInlineQuery(image);
+        } catch (error) {
+          console.log(error, "Try again");
+        }
+      };
+
+      search.json(params, await callback);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+bot.launch();
