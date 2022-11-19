@@ -81,7 +81,7 @@ bot.on("inline_query", async (ctx) => {
               type: "photo",
               id: String(index),
               photo_url: item.original,
-              thumb_url: item.original,
+              thumb_url: item.thumbnail,
               photo_width: 300,
               photo_height: 200,
             };
