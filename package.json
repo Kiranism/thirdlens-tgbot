@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "micro-bot"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +13,7 @@
     "dotenv": "^16.0.3",
     "google-search-results-nodejs": "^2.1.0",
     "images-scraper": "^6.4.1",
+    "micro-bot": "^2.5.3",
     "node-telegram-bot-api": "^0.59.0",
     "pm2": "^5.2.2",
     "telegraf": "^4.10.0",
